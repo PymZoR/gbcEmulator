@@ -22,3 +22,6 @@ $(outDir)/%.o : %.cpp
 
 clean:
 	rm -f $(outDir)/*.o
+
+web:
+	make clean && make target=out.js CXX=em++ && python2 -m SimpleHTTPServer 8080&
