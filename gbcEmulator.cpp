@@ -55,13 +55,22 @@ void resize(int windowWidth, int windowHeight)
  */
 void drawPixel(int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
-    x *= pixel_size_w;
-    y *= pixel_size_h;
+    int containerWidth = window->w;
+    int containedWidth = NATIVE_WIDTH * pixel_size_w;
+    int containerHeight = window->h;
+    int containedHeight = NATIVE_HEIGHT * pixel_size_h;
+
+    int offsetX = (int)(((float)containerWidth / 2) - ((float)containedWidth / 2));
+    int offsetY = (int)(((float)containerHeight / 2) - ((float)containedHeight / 2));
+
+    cout << offsetY << endl;
+
+    x = x * pixel_size_w + offsetX;
+    y = y * pixel_size_h + offsetY;
 
     SDL_Rect rect = { x, y, pixel_size_w, pixel_size_h };
     SDL_FillRect(window, &rect, SDL_MapRGB(window->format, r, g, b));
 }
-
 
 /**
  * Draw next frame
@@ -80,8 +89,6 @@ void drawScreen()
         if (!keep_ratio) {
             pixel_size_w = pixelSizeW;
             pixel_size_h = pixelSizeH;
-            cout << pixel_size_w << ":" << pixel_size_h << endl;
-            cout << pixel_size_w * NATIVE_WIDTH << ";" << pixel_size_h * NATIVE_HEIGHT;
         }
         else {
             pixel_size_w = min(pixelSizeW, pixelSizeH);
