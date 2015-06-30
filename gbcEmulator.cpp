@@ -12,6 +12,8 @@ const int NATIVE_WIDTH   = 160;
 const int NATIVE_HEIGHT  = 144;
 
 
+int game_w;
+int game_h;
 int pixel_size_w = 5;
 int pixel_size_h = 5;
 bool surface_drawn = false;
@@ -19,7 +21,21 @@ bool keep_ratio = false;
 
 
 // SDL Variables
+int bpp = 32;
+int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF;
+SDL_Surface* screen;
 SDL_Surface* window;
+
+
+/**
+  * Update game dimensions
+  */
+void resize(int w, int h) {
+    cout << SDL_GetVideoSurface() << endl;
+    cout << window << endl;
+    game_w = w;
+    game_h = h;
+}
 
 
 /**
@@ -27,9 +43,9 @@ SDL_Surface* window;
  */
 void drawPixel(int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
-    int containerWidth = window->w;
+    int containerWidth = game_w;
     int containedWidth = NATIVE_WIDTH * pixel_size_w;
-    int containerHeight = window->h;
+    int containerHeight = game_h;
     int containedHeight = NATIVE_HEIGHT * pixel_size_h;
 
     int offsetX = (int)(((float)containerWidth / 2) - ((float)containedWidth / 2));
@@ -51,10 +67,11 @@ void drawScreen()
     SDL_Flip(window);
 
     if (!surface_drawn) {
-        surface_drawn = true;
+        SDL_FillRect(window, NULL, SDL_MapRGB(window->format, 255, 255, 255));
+        //surface_drawn = true;
 
-        int pixelSizeW = window->w / NATIVE_WIDTH;
-        int pixelSizeH = window->h / NATIVE_HEIGHT;
+        int pixelSizeW = game_w / NATIVE_WIDTH;
+        int pixelSizeH = game_h / NATIVE_HEIGHT;
 
         if (!keep_ratio) {
             pixel_size_w = pixelSizeW;
@@ -70,6 +87,8 @@ void drawScreen()
                 drawPixel(i, j, rand() % 256, rand() % 256, rand() % 256);
             }
         }
+
+        SDL_Delay(100);
     }
 }
 
@@ -83,6 +102,10 @@ void processEvents()
             case SDL_QUIT:
                 exit(EXIT_SUCCESS);
                 break;
+            case SDL_VIDEORESIZE:
+                screen = SDL_SetVideoMode(event.resize.w, event.resize.h, bpp,
+                                          flags);
+                resize(event.resize.w, event.resize.h);
         }
     }
 }
@@ -115,16 +138,16 @@ int main(int argc, char** argv)
     const SDL_VideoInfo* screenInfo = SDL_GetVideoInfo();
     int screenWidth = screenInfo->current_w / 2;
     int screenHeight = screenInfo->current_h / 2;
-    int bpp = 32;
-    int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF;
 
-    if (SDL_SetVideoMode(screenWidth, screenHeight, bpp, flags) == 0) {
+    screen = SDL_SetVideoMode(screenWidth, screenHeight, bpp, flags);
+    if (screen == NULL) {
         cout << "Video mode set failed: " << SDL_GetError() << endl;
         exit(EXIT_SUCCESS);
     }
     SDL_WM_SetCaption("gbcEmulator", NULL);
 
     window = SDL_GetVideoSurface();
+    resize(window->w, window->h);
 
     #ifdef EMSCRIPTEN
         emscripten_set_main_loop(oneIteration, 0, 1);
