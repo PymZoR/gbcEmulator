@@ -6,7 +6,6 @@
 
 using namespace std;
 
-
 // Native GBC display info
 const int NATIVE_WIDTH   = 160;
 const int NATIVE_HEIGHT  = 144;
@@ -31,8 +30,6 @@ SDL_Surface* window;
   * Update game dimensions
   */
 void resize(int w, int h) {
-    cout << SDL_GetVideoSurface() << endl;
-    cout << window << endl;
     game_w = w;
     game_h = h;
 }
@@ -68,7 +65,8 @@ void drawScreen()
 
     if (!surface_drawn) {
         SDL_FillRect(window, NULL, SDL_MapRGB(window->format, 255, 255, 255));
-        //surface_drawn = true;
+        // Uncomment if emscripten
+        // surface_drawn = true;
 
         int pixelSizeW = game_w / NATIVE_WIDTH;
         int pixelSizeH = game_h / NATIVE_HEIGHT;
@@ -88,6 +86,7 @@ void drawScreen()
             }
         }
 
+        // comment if emscripten
         SDL_Delay(100);
     }
 }
@@ -138,6 +137,10 @@ int main(int argc, char** argv)
     const SDL_VideoInfo* screenInfo = SDL_GetVideoInfo();
     int screenWidth = screenInfo->current_w / 2;
     int screenHeight = screenInfo->current_h / 2;
+    #ifdef EMSCRIPTEN
+        screenWidth = screenInfo->current_w * 2;
+        screenHeight = screenInfo->current_h * 2;
+    #endif
 
     screen = SDL_SetVideoMode(screenWidth, screenHeight, bpp, flags);
     if (screen == NULL) {
