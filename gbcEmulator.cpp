@@ -10,11 +10,8 @@ using namespace std;
 // Native GBC display info
 const int NATIVE_WIDTH   = 160;
 const int NATIVE_HEIGHT  = 144;
-const float NATIVE_RATIO = 160.0 / 144;
 
 
-int screenWidth;
-int screenHeight;
 int pixel_size_w = 5;
 int pixel_size_h = 5;
 bool surface_drawn = false;
@@ -23,31 +20,6 @@ bool keep_ratio = false;
 
 // SDL Variables
 SDL_Surface* window;
-
-
-/**
- * Resize game surface depending on the window
- * @param windowWidth  window width
- * @param windowHeight window height
- */
-void resize(int windowWidth, int windowHeight)
-{
-    float screenRatio = (float)windowWidth / windowHeight;
-
-    float gameWidth;
-    float gameHeight;
-
-    if (screenRatio > NATIVE_RATIO) {
-        gameWidth = NATIVE_WIDTH * ((float)windowHeight / NATIVE_HEIGHT);
-        gameHeight = windowHeight;
-    }
-    else {
-        gameWidth = windowWidth;
-        gameHeight = NATIVE_HEIGHT * ((float)windowWidth / NATIVE_WIDTH);
-    }
-
-    //TODO : create/update game surface to gameWidth/gameHeight and center it
-}
 
 
 /**
@@ -62,8 +34,6 @@ void drawPixel(int x, int y, Uint8 r, Uint8 g, Uint8 b)
 
     int offsetX = (int)(((float)containerWidth / 2) - ((float)containedWidth / 2));
     int offsetY = (int)(((float)containerHeight / 2) - ((float)containedHeight / 2));
-
-    cout << offsetY << endl;
 
     x = x * pixel_size_w + offsetX;
     y = y * pixel_size_h + offsetY;
@@ -113,9 +83,6 @@ void processEvents()
             case SDL_QUIT:
                 exit(EXIT_SUCCESS);
                 break;
-
-            case SDL_VIDEORESIZE:
-                resize(event.resize.w, event.resize.h);
         }
     }
 }
@@ -146,8 +113,8 @@ int main(int argc, char** argv)
     }
 
     const SDL_VideoInfo* screenInfo = SDL_GetVideoInfo();
-    screenWidth = screenInfo->current_w / 2;
-    screenHeight = screenInfo->current_h / 2;
+    int screenWidth = screenInfo->current_w / 2;
+    int screenHeight = screenInfo->current_h / 2;
     int bpp = 32;
     int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF;
 
@@ -156,7 +123,6 @@ int main(int argc, char** argv)
         exit(EXIT_SUCCESS);
     }
     SDL_WM_SetCaption("gbcEmulator", NULL);
-    resize(screenWidth, screenHeight);
 
     window = SDL_GetVideoSurface();
 
