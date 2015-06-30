@@ -15,8 +15,10 @@ const float NATIVE_RATIO = 160.0 / 144;
 
 int screenWidth;
 int screenHeight;
-int pixel_size = 5;
+int pixel_size_w = 5;
+int pixel_size_h = 5;
 bool surface_drawn = false;
+bool keep_ratio = false;
 
 
 // SDL Variables
@@ -53,10 +55,10 @@ void resize(int windowWidth, int windowHeight)
  */
 void drawPixel(int x, int y, Uint8 r, Uint8 g, Uint8 b)
 {
-    x *= pixel_size;
-    y *= pixel_size;
+    x *= pixel_size_w;
+    y *= pixel_size_h;
 
-    SDL_Rect rect = { x, y, pixel_size, pixel_size };
+    SDL_Rect rect = { x, y, pixel_size_w, pixel_size_h };
     SDL_FillRect(window, &rect, SDL_MapRGB(window->format, r, g, b));
 }
 
@@ -74,7 +76,17 @@ void drawScreen()
 
         int pixelSizeW = window->w / NATIVE_WIDTH;
         int pixelSizeH = window->h / NATIVE_HEIGHT;
-        pixel_size = min(pixelSizeW, pixelSizeH);
+
+        if (!keep_ratio) {
+            pixel_size_w = pixelSizeW;
+            pixel_size_h = pixelSizeH;
+            cout << pixel_size_w << ":" << pixel_size_h << endl;
+            cout << pixel_size_w * NATIVE_WIDTH << ";" << pixel_size_h * NATIVE_HEIGHT;
+        }
+        else {
+            pixel_size_w = min(pixelSizeW, pixelSizeH);
+            pixel_size_h = pixel_size_w;
+        }
 
         for (size_t i = 0; i < NATIVE_WIDTH; i++) {
             for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
@@ -127,8 +139,8 @@ int main(int argc, char** argv)
     }
 
     const SDL_VideoInfo* screenInfo = SDL_GetVideoInfo();
-    screenWidth = screenInfo->current_w;
-    screenHeight = screenInfo->current_h;
+    screenWidth = screenInfo->current_w / 2;
+    screenHeight = screenInfo->current_h / 2;
     int bpp = 32;
     int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF;
 
