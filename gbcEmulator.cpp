@@ -26,18 +26,18 @@ SDL_Surface* window;
 /**
  * Resize game surface depending on the window
  * @param windowWidth  window width
- * @param WindowHeight window height
+ * @param windowHeight window height
  */
-void resize(int windowWidth, int WindowHeight)
+void resize(int windowWidth, int windowHeight)
 {
-    float screenRatio = (float)windowWidth / WindowHeight;
+    float screenRatio = (float)windowWidth / windowHeight;
 
     float gameWidth;
     float gameHeight;
 
     if (screenRatio > NATIVE_RATIO) {
-        gameWidth = NATIVE_WIDTH * ((float)WindowHeight / NATIVE_HEIGHT);
-        gameHeight = WindowHeight;
+        gameWidth = NATIVE_WIDTH * ((float)windowHeight / NATIVE_HEIGHT);
+        gameHeight = windowHeight;
     }
     else {
         gameWidth = windowWidth;
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     int flags = SDL_HWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF;
 
     if (SDL_SetVideoMode(screenWidth, screenHeight, bpp, flags) == 0) {
-        printf("Video mode set failed: %s\n", SDL_GetError());
+        cout << "Video mode set failed: " << SDL_GetError() << endl;
         exit(EXIT_SUCCESS);
     }
     SDL_WM_SetCaption("gbcEmulator", NULL);
