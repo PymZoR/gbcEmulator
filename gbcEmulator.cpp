@@ -100,6 +100,7 @@ void processEvents()
                 exit(EXIT_SUCCESS);
                 break;
             case SDL_VIDEORESIZE:
+                SDL_FreeSurface(screen);
                 screen = SDL_SetVideoMode(event.resize.w, event.resize.h, bpp,
                                           flags);
                 resize(event.resize.w, event.resize.h);
@@ -134,8 +135,13 @@ int main(int argc, char** argv)
     }
 
     const SDL_VideoInfo* screen_info = SDL_GetVideoInfo();
-    int screen_width = screen_info->current_w / 2;
+    int screen_width  = screen_info->current_w / 2;
     int screen_height = screen_info->current_h / 2;
+
+    #ifdef EMSCRIPTEN
+        screen_width  = screen_info->current_w;
+        screen_height = screen_info->current_h;
+    #endif
 
     screen = SDL_SetVideoMode(screen_width, screen_height, bpp, flags);
     if (screen == NULL) {
@@ -148,6 +154,7 @@ int main(int argc, char** argv)
     resize(window->w, window->h);
 
     // Generate pixels
+    srand (time(NULL));
     for (size_t i = 0; i < NATIVE_WIDTH; i++) {
         for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
             pixels_map[i][j] = SDL_MapRGB(window->format, rand() % 256, rand() % 256, rand() % 256);

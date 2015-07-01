@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>GBC Emulator</title>
+
+        <style>
+            html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; }
+
+            body { font-family: sans-serif; }
+
+            #output { height: calc(100% - 40px); width: 100%; border: 1px solid red; box-sizing: border-box; }
+
+            #status { height: 40px; background-color: #444; color: #fff; line-height: 40px; padding-left: 20px; }
+        </style>
+    </head>
+    <body>
+        <div id="output">
+            <canvas id="renderer" width="500" height="600"></canvas>
+        </div>
+        <div id="status">Downloading (0%)...</div>
+
+        <script>
+            var $status   = document.getElementById('status');
+            var $renderer = document.getElementById('renderer');
+            var $output   = document.getElementById('output');
+        </script>
+
+        <script>
+            $renderer.width  = window.innerWidth;
+            $renderer.height = window.innerHeight - 40;
+
+            window.addEventListener('resize', function () {
+                Module.setCanvasSize(window.innerWidth, window.innerHeight - 40)
+                // $renderer.height = ;
+            }, true);
+        </script>
+
+        <script>
+            var Module = {
+                preRun: [],
+                postRun: [],
+                print: function () {
+                    console.log.apply(console, arguments);
+                },
+                printErr: function () {
+                    console.error.apply(console, arguments);
+                },
+                canvas: $renderer,
+                setStatus: function (t) {
+                      if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                      if (t === Module.setStatus.text) return;
+                      $status.innerHTML = t;
+                },
+                totalDependencies: 0,
+                monitorRunDependencies: function(left) {
+                    this.totalDependencies = Math.max(this.totalDependencies, left);
+                    Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+                }
+            }
+        </script>
+
+        <script>
+            var req = new XMLHttpRequest();
+            req.addEventListener('progress', function (e) {
+                if (e.lengthComputable) {
+                    var percent = parseInt(e.loaded / e.total, 10) * 100;
+                    $status.innerHTML = 'Downloading (' + percent + '%)...';
+                }
+            }, false);
+
+            req.addEventListener('load', function (e) {
+                var $script = document.createElement('script');
+                $script.innerHTML = e.target.responseText;
+                $status.innerHTML = 'Parsing ...';
+                document.body.appendChild($script);
+                $script.addEventListener('load', function () {
+                    $status.innerHTML = 'Parsed !';
+                });
+            });
+
+            req.open('GET', 'out.js');
+            req.send();
+        </script>
+    </body>
+</html>
