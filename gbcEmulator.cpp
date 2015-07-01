@@ -20,8 +20,6 @@ bool keep_ratio = true;
 
 // Map
 Uint32 pixels_map[NATIVE_WIDTH][NATIVE_HEIGHT] = { { 0 } };
-Uint32 pixels_map_actual[NATIVE_WIDTH][NATIVE_HEIGHT] = { { 1 } };
-
 
 // SDL Variables
 int bpp = 32;
@@ -78,7 +76,6 @@ void drawScreen()
 {
     for (size_t i = 0; i < NATIVE_WIDTH; i++) {
         for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
-            pixels_map_actual[i][j] = pixels_map[i][j];
             drawPixel(i, j, pixels_map[i][j]);
         }
     }
@@ -152,7 +149,7 @@ int main(int argc, char** argv)
     srand (time(NULL));
     for (size_t i = 0; i < NATIVE_WIDTH; i++) {
         for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
-            Uint32 color = rand() % 0xFFFFFFFF;
+            Uint32 color = SDL_MapRGB(window->format, rand() % 256, rand() % 256, rand() % 256);
             pixels_map[i][j] = color;
             drawPixel(i, j, color);
         }
