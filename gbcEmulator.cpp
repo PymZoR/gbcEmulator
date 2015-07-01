@@ -15,7 +15,7 @@ int game_w;
 int game_h;
 int pixel_size_w = 5;
 int pixel_size_h = 5;
-bool keep_ratio = false;
+bool keep_ratio = true;
 
 
 // Map
@@ -46,7 +46,7 @@ void resize(int w, int h) {
     }
     else {
         pixel_size_w = min(new_pixel_size_w, new_pixel_size_h);
-        pixel_size_h = new_pixel_size_w;
+        pixel_size_h = pixel_size_w;
     }
 }
 
