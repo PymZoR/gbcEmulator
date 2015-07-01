@@ -24,4 +24,13 @@ clean:
 	rm -f $(outDir)/*.o
 
 web:
-	make clean && make target=out.js CXX=em++ && python2 -m SimpleHTTPServer 8080&
+	make clean && make target=out.js CXX=em++
+
+serve:
+	x-www-browser http://localhost:8080/build/out.html && python2 -m SimpleHTTPServer 8080&
+
+stopServe:
+	killall python2
+
+native:
+	make clean && make && ./build/gbcEmulator.out

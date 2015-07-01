@@ -15,8 +15,12 @@ int game_w;
 int game_h;
 int pixel_size_w = 5;
 int pixel_size_h = 5;
-bool surface_drawn = false;
 bool keep_ratio = false;
+
+
+// Map
+Uint32 pixels_map[NATIVE_WIDTH][NATIVE_HEIGHT] = { { 0 } };
+Uint32 pixels_map_actual[NATIVE_WIDTH][NATIVE_HEIGHT] = { { 1 } };
 
 
 // SDL Variables
@@ -27,67 +31,61 @@ SDL_Surface* window;
 
 
 /**
-  * Update game dimensions
-  */
+ * Update game dimensions
+ */
 void resize(int w, int h) {
     game_w = w;
     game_h = h;
+
+    int new_pixel_size_w = game_w / NATIVE_WIDTH;
+    int new_pixel_size_h = game_h / NATIVE_HEIGHT;
+
+    if (!keep_ratio) {
+        pixel_size_w = new_pixel_size_w;
+        pixel_size_h = new_pixel_size_h;
+    }
+    else {
+        pixel_size_w = min(new_pixel_size_w, new_pixel_size_h);
+        pixel_size_h = new_pixel_size_w;
+    }
 }
 
 
 /**
  * Draw a big pixel
  */
-void drawPixel(int x, int y, Uint8 r, Uint8 g, Uint8 b)
+void drawPixel(int x, int y, Uint32 color)
 {
-    int containerWidth = game_w;
-    int containedWidth = NATIVE_WIDTH * pixel_size_w;
-    int containerHeight = game_h;
-    int containedHeight = NATIVE_HEIGHT * pixel_size_h;
+    int container_width = game_w;
+    int contained_width = NATIVE_WIDTH * pixel_size_w;
+    int container_height = game_h;
+    int contained_height = NATIVE_HEIGHT * pixel_size_h;
 
-    int offsetX = (int)(((float)containerWidth / 2) - ((float)containedWidth / 2));
-    int offsetY = (int)(((float)containerHeight / 2) - ((float)containedHeight / 2));
+    int offset_x = (int)(((float)container_width / 2) - ((float)contained_width / 2));
+    int offset_y = (int)(((float)container_height / 2) - ((float)contained_height / 2));
 
-    x = x * pixel_size_w + offsetX;
-    y = y * pixel_size_h + offsetY;
+    x = x * pixel_size_w + offset_x;
+    y = y * pixel_size_h + offset_y;
 
     SDL_Rect rect = { x, y, pixel_size_w, pixel_size_h };
-    SDL_FillRect(window, &rect, SDL_MapRGB(window->format, r, g, b));
+    SDL_FillRect(window, &rect, color);
 }
 
 /**
  * Draw next frame
  */
-void drawScreen()
+void drawScreen(bool force = false)
 {
     //TODO: control FPS with emscripten
     SDL_Flip(window);
 
-    if (!surface_drawn) {
-        SDL_FillRect(window, NULL, SDL_MapRGB(window->format, 255, 255, 255));
-        // Uncomment if emscripten
-        // surface_drawn = true;
-
-        int pixelSizeW = game_w / NATIVE_WIDTH;
-        int pixelSizeH = game_h / NATIVE_HEIGHT;
-
-        if (!keep_ratio) {
-            pixel_size_w = pixelSizeW;
-            pixel_size_h = pixelSizeH;
-        }
-        else {
-            pixel_size_w = min(pixelSizeW, pixelSizeH);
-            pixel_size_h = pixel_size_w;
-        }
-
-        for (size_t i = 0; i < NATIVE_WIDTH; i++) {
-            for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
-                drawPixel(i, j, rand() % 256, rand() % 256, rand() % 256);
+    for (size_t i = 0; i < NATIVE_WIDTH; i++) {
+        for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
+            if (pixels_map[i][j] != pixels_map_actual[i][j] || force) {
+                pixels_map_actual[i][j] = pixels_map[i][j];
+                drawPixel(i, j, pixels_map[i][j]);
             }
         }
-
-        // comment if emscripten
-        SDL_Delay(100);
     }
 }
 
@@ -105,6 +103,7 @@ void processEvents()
                 screen = SDL_SetVideoMode(event.resize.w, event.resize.h, bpp,
                                           flags);
                 resize(event.resize.w, event.resize.h);
+                drawScreen(true);
         }
     }
 }
@@ -134,15 +133,11 @@ int main(int argc, char** argv)
         exit(EXIT_FAILURE);
     }
 
-    const SDL_VideoInfo* screenInfo = SDL_GetVideoInfo();
-    int screenWidth = screenInfo->current_w / 2;
-    int screenHeight = screenInfo->current_h / 2;
-    #ifdef EMSCRIPTEN
-        screenWidth = screenInfo->current_w * 2;
-        screenHeight = screenInfo->current_h * 2;
-    #endif
+    const SDL_VideoInfo* screen_info = SDL_GetVideoInfo();
+    int screen_width = screen_info->current_w / 2;
+    int screen_height = screen_info->current_h / 2;
 
-    screen = SDL_SetVideoMode(screenWidth, screenHeight, bpp, flags);
+    screen = SDL_SetVideoMode(screen_width, screen_height, bpp, flags);
     if (screen == NULL) {
         cout << "Video mode set failed: " << SDL_GetError() << endl;
         exit(EXIT_SUCCESS);
@@ -151,6 +146,13 @@ int main(int argc, char** argv)
 
     window = SDL_GetVideoSurface();
     resize(window->w, window->h);
+
+    // Generate pixels
+    for (size_t i = 0; i < NATIVE_WIDTH; i++) {
+        for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
+            pixels_map[i][j] = SDL_MapRGB(window->format, rand() % 256, rand() % 256, rand() % 256);
+        }
+    }
 
     #ifdef EMSCRIPTEN
         emscripten_set_main_loop(oneIteration, 0, 1);
