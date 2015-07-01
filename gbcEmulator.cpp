@@ -74,17 +74,12 @@ void drawPixel(int x, int y, Uint32 color)
 /**
  * Draw next frame
  */
-void drawScreen(bool force = false)
+void drawScreen()
 {
-    //TODO: control FPS with emscripten
-    SDL_Flip(window);
-
     for (size_t i = 0; i < NATIVE_WIDTH; i++) {
         for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
-            if (pixels_map[i][j] != pixels_map_actual[i][j] || force) {
-                pixels_map_actual[i][j] = pixels_map[i][j];
-                drawPixel(i, j, pixels_map[i][j]);
-            }
+            pixels_map_actual[i][j] = pixels_map[i][j];
+            drawPixel(i, j, pixels_map[i][j]);
         }
     }
 }
@@ -104,7 +99,7 @@ void processEvents()
                 screen = SDL_SetVideoMode(event.resize.w, event.resize.h, bpp,
                                           flags);
                 resize(event.resize.w, event.resize.h);
-                drawScreen(true);
+                drawScreen();
         }
     }
 }
@@ -116,7 +111,7 @@ void processEvents()
 void oneIteration()
 {
     processEvents();
-    drawScreen();
+    SDL_Flip(window);
 }
 
 
@@ -157,7 +152,9 @@ int main(int argc, char** argv)
     srand (time(NULL));
     for (size_t i = 0; i < NATIVE_WIDTH; i++) {
         for (size_t j = 0; j < NATIVE_HEIGHT; j++) {
-            pixels_map[i][j] = SDL_MapRGB(window->format, rand() % 256, rand() % 256, rand() % 256);
+            Uint32 color = rand() % 0xFFFFFFFF;
+            pixels_map[i][j] = color;
+            drawPixel(i, j, color);
         }
     }
 
