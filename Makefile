@@ -3,7 +3,7 @@ CXXWEB = em++
 CXXFLAGS = -g -Wall
 LDFLAGS = -lSDL
 
-src = $(wildcard *.cpp)
+src = $(wildcard src/*.cpp)
 obj = $(src:.cpp=.o)
 target = gbcEmulator.out
 outDir = ./build
@@ -21,7 +21,7 @@ $(outDir)/%.o : %.cpp
 .PHONY: clean
 
 clean:
-	rm -f $(outDir)/*.o
+	rm -f $(outDir)/src/*.o
 
 web:
 	make clean && make target=out.js CXX=em++
