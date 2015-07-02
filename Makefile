@@ -27,7 +27,7 @@ web:
 	make clean && make target=out.js CXX=em++
 
 serve:
-	x-www-browser http://localhost:8080/build/out2.html && python2 -m SimpleHTTPServer 8080&
+	xdg-open http://localhost:8080/build/out2.html && python2 -m SimpleHTTPServer 8080
 
 stopServe:
 	killall python2
