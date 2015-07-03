@@ -65,10 +65,10 @@ class CPU
 
 
     private:
-        void noop();
-        void LDBC_nn();
-        void LDBC_A();
-        void INC_BC();
+        void noop();    // 0x00 : No operation
+        void LDBC_nn(); // 0x01 : Loads next and next into B and C
+        void LDBC_A();  // 0x02 : Stores the location pointed by BC
+        void INC_BC();  // 0x03 : Adds one to BC
 
         Reg _AF;
         Reg _BC;

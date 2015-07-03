@@ -48,26 +48,27 @@ void CPU::oneIteration()
     this->PC &= 0xFFFF;
 }
 
-
 void CPU::noop() {}
+
 void CPU::LDBC_nn()
 {
     C = this->memory->readByte(this->PC++);
     B = this->memory->readByte(this->PC++);
     this->clock_m = 12;
 }
+
 void CPU::LDBC_A()
 {
     this->memory->writeByte((B << 8) | A, A);
     this->clock_m = 8;
 }
+
 void CPU::INC_BC()
 {
     Uint8 T = (((B << 8) | C) + 1) & 0xFFFF;
     C = T & 0xFF;
     this->clock_m = 8;
 }
-
 
 void CPU::bindMemory(Memory* memory)
 {
