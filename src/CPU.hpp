@@ -42,6 +42,9 @@ class CPU
         void oneIteration();
         void bindMemory(Memory* memory);
 
+        Uint16 clock_m;
+        Uint16 clock_t;
+
         // 16-bit registers
         Uint16 SP;
         Uint16 PC;
@@ -62,7 +65,10 @@ class CPU
 
 
     private:
-        void opFuncTest();
+        void noop();
+        void LDBC_nn();
+        void LDBC_A();
+        void INC_BC();
 
         Reg _AF;
         Reg _BC;

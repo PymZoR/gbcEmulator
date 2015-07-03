@@ -14,7 +14,10 @@ AF(_AF.word), BC(_BC.word), DE(_DE.word), HL(_HL.word),
 A(_AF.hb), F(_AF.lb), B(_BC.hb), C(_BC.lb), D(_DE.hb),
 E(_DE.lb), H(_HL.hb), L(_HL.lb)
 {
-    this->opcodesList[0x00] = &CPU::opFuncTest;
+    this->opcodesList[0x00] = &CPU::noop;
+    this->opcodesList[0x01] = &CPU::LDBC_nn;
+    this->opcodesList[0x02] = &CPU::LDBC_A;
+    this->opcodesList[0x03] = &CPU::INC_BC;
 
     this->reset();
 }
@@ -46,9 +49,23 @@ void CPU::oneIteration()
 }
 
 
-void CPU::opFuncTest()
+void CPU::noop() {}
+void CPU::LDBC_nn()
 {
-    cout << "opFuncTest" << endl;
+    C = this->memory->readByte(this->PC++);
+    B = this->memory->readByte(this->PC++);
+    this->clock_m = 12;
+}
+void CPU::LDBC_A()
+{
+    this->memory->writeByte((B << 8) | A, A);
+    this->clock_m = 8;
+}
+void CPU::INC_BC()
+{
+    Uint8 T = (((B << 8) | C) + 1) & 0xFFFF;
+    C = T & 0xFF;
+    this->clock_m = 8;
 }
 
 
