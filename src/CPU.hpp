@@ -75,7 +75,7 @@ class CPU
         Reg _DE;
         Reg _HL;
 
-        opFunction opcodesList[2];
+        opFunction opcodesList[4];
         Memory* memory;
 };
 

@@ -1,14 +1,16 @@
 #include <iostream>
 #include <SDL/SDL.h>
 
-#include "GPU.hpp"
+#include "Screen.hpp"
 #include "Memory.hpp"
 #include "CPU.hpp"
+#include "GPU.hpp"
 
 
 using namespace std;
 
 
+Screen* screen;
 GPU* gpu;
 CPU* cpu;
 Memory* memory;
@@ -16,14 +18,15 @@ Memory* memory;
 
 void oneIteration()
 {
-    gpu->oneIteration();
+    screen->oneIteration();
 }
 
 
 int main(int argc, char** argv)
 {
-    gpu = new GPU();
+    screen = new Screen();
     cpu = new CPU();
+    gpu = new GPU();
     memory = new Memory(gpu, NULL, NULL);
 
     cpu->bindMemory(memory);
