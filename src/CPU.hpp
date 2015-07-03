@@ -6,13 +6,20 @@
 #include <map>
 #include <SDL/SDL.h>
 
-#include "Memory.hpp"
-
 
 using namespace std;
 
 
+/*
+    Forward declarations
+ */
+class Memory;
 class CPU;
+
+
+/*
+    Types
+ */
 typedef void(CPU::*opFunction)();
 
 
@@ -29,10 +36,11 @@ union Reg
 class CPU
 {
     public:
-        CPU(Memory* memory);
+        CPU();
         ~CPU();
         void reset();
         void oneIteration();
+        void bindMemory(Memory* memory);
 
         // 16-bit registers
         Uint16 SP;
@@ -54,8 +62,7 @@ class CPU
 
 
     private:
-        void test();
-        void test2();
+        void opFuncTest();
 
         Reg _AF;
         Reg _BC;

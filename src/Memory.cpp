@@ -1,11 +1,10 @@
 #include "Memory.hpp"
+#include "CPU.hpp"
 
-
-Memory::Memory(CPU* cpu, GPU* gpu, Key* key, Timer* timer)
+Memory::Memory(GPU* gpu, Key* key, Timer* timer)
 {
 
     this->biosMapped = false;
-    this->cpu = cpu;
     this->gpu = gpu;
     this->key = key;
     this->timer = timer;
@@ -28,7 +27,7 @@ Memory::~Memory()
 
 }
 
-Uint8 Memory::rb(Uint16 addr) {
+Uint8 Memory::readByte(Uint16 addr) {
     if (addr < 0 || addr > 0xFFFF) {
         return 0;
     }
@@ -92,9 +91,10 @@ Uint8 Memory::rb(Uint16 addr) {
                     switch(addr&0xF)
                     {
                         case 0:
-                            return this->key->rb();
+                            //return this->key->readByte(addr) TODO: correct
+                            return this->key->readByte();
                         case 4: case 5: case 6: case 7:
-                            this->timer->rb(addr);
+                            this->timer->readByte(addr);
                         case 15:
                             return this->if_;
                         default:
@@ -103,16 +103,19 @@ Uint8 Memory::rb(Uint16 addr) {
                 case 0x10: case 0x20: case 0x30:
                     return 0;
                 case 0x40: case 0x50: case 0x60: case 0x70:
-                    return this->gpu->rb(addr);
+                    return this->gpu->readByte(addr);
             }
     }
+
+    // TODO: correct
+    return 0;
 }
 
-Uint16 Memory::rw(Uint16 addr) {
-    return this->rb(addr) + (this->rb(addr + 1) << 8);
+Uint16 Memory::readWord(Uint16 addr) {
+    return this->readByte(addr) + (this->readByte(addr + 1) << 8);
 }
 
-void Memory::wb(Uint16 addr, Uint8 value) {
+void Memory::writeByte(Uint16 addr, Uint8 value) {
     if (addr <= 0x1FFF) {
         if (this->carttype == 1) {
             this->mbc_ramon = ((value & 0xF) == 0xA) ? true : false;
@@ -156,7 +159,7 @@ void Memory::wb(Uint16 addr, Uint8 value) {
 
     if (addr <= 0x9FFF) {
         this->gpu->vram[addr & 0x1FFF] = value;
-        this->gpu->updatetile(addr & 0x1FF, value);
+        this->gpu->updateTile(addr & 0x1FF, value);
         return;
     }
 
@@ -180,7 +183,7 @@ void Memory::wb(Uint16 addr, Uint8 value) {
             return;
         case 0xE00:
             if ((addr & 0xFF) < 0xA0) { this->gpu->oam[addr & 0xFF] = value; }
-            this->gpu->updateoam(addr, value);
+            this->gpu->updateOam(addr, value);
             return;
         case 0xF00:
             if (addr == 0xFFFF) { this->ie = value; return; }
@@ -191,28 +194,34 @@ void Memory::wb(Uint16 addr, Uint8 value) {
                     switch (addr & 0xF)
                     {
                         case 0:
-                            this->key->wb(value);
+                            //this->key->writeByte(addr, value) TODO: correct
+                            this->key->writeByte(value);
                             return;
                         case 4: case 5: case 6: case 7:
-                            this->timer->wb(addr, value);
+                            this->timer->writeByte(addr, value);
                             return;
                         case 15:
                             this->if_ = value;
                             return;
                     }
                 case 0x40: case 0x50: case 0x60: case 0x70:
-                    this->gpu->wb(addr, value);
+                    this->gpu->writeByte(addr, value);
                     return;
 
             }
     }
 }
 
-void Memory::ww(Uint16 addr, Uint16 value) {
-    this->wb(addr, value & 255);
-    this->wb(addr + 1, value >> 8);
+void Memory::writeWord(Uint16 addr, Uint16 value) {
+    this->writeByte(addr, value & 255);
+    this->writeByte(addr + 1, value >> 8);
 }
 
 void Memory::load(Uint8* file, size_t len) {
     memmove(this->rom, file, len * sizeof(Uint8));
+}
+
+void Memory::bindCPU(CPU* cpu)
+{
+    this->cpu = cpu;
 }

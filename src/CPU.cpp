@@ -1,4 +1,5 @@
 #include "CPU.hpp"
+#include "Memory.hpp"
 
 
 // Flag shortcuts
@@ -8,12 +9,11 @@
 #define c 0b00010000
 
 
-CPU::CPU(Memory* memory):
+CPU::CPU():
 AF(_AF.word), BC(_BC.word), DE(_DE.word), HL(_HL.word),
 A(_AF.hb), F(_AF.lb), B(_BC.hb), C(_BC.lb), D(_DE.hb),
 E(_DE.lb), H(_HL.hb), L(_HL.lb)
 {
-    this->memory = memory;
     this->opcodesList[0x00] = &CPU::opFuncTest;
 
     this->reset();
@@ -49,4 +49,10 @@ void CPU::oneIteration()
 void CPU::opFuncTest()
 {
     cout << "opFuncTest" << endl;
+}
+
+
+void CPU::bindMemory(Memory* memory)
+{
+    this->memory = memory;
 }

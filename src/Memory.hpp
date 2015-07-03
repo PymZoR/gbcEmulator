@@ -7,16 +7,23 @@
 #include <iostream>
 #include <SDL/SDL.h>
 
-#include "CPU.hpp"
 #include "GPU.hpp"
+#include "Key.hpp"
+#include "Timer.hpp"
 
 using namespace std;
+
+
+/*
+    Forward declarations
+ */
+class CPU;
 
 
 class Memory
 {
     public:
-        Memory(CPU* cpu, GPU* gpu, Key* key, Timer* timer);
+        Memory(GPU* gpu, Key* key, Timer* timer);
         ~Memory();
 
         /**
@@ -24,28 +31,28 @@ class Memory
          * @param  addr  The address index
          * @return value The value at the given address
          */
-        Uint8 rb(Uint16 addr);
+        Uint8 readByte(Uint16 addr);
 
         /**
          * Read a word (two bytes) given an address. Automatically choose the dest ram
          * @param  addr  The address index
          * @return value The value at the given address
          */
-        Uint16 rw(Uint16 addr);
+        Uint16 readWord(Uint16 addr);
 
         /**
          * Writes a byte on the address. Automatically choose the source ram
          * @param addr  The address index
          * @param value The byte value
          */
-         void wb(Uint16 addr, Uint8 value);
+         void writeByte(Uint16 addr, Uint8 value);
 
          /**
           * Writes a word (two bytes) given an address. Automatically choose the dest ram
           * @param  addr  The address index
           * @return value The value at the given address
           */
-         void ww(Uint16 addr, Uint16 value);
+         void writeWord(Uint16 addr, Uint16 value);
 
         /**
          * Loads a game into the Memory
@@ -53,6 +60,8 @@ class Memory
          * @param len  The length of the file
          */
          void load(Uint8* file, size_t len);
+
+         void bindCPU(CPU* cpu);
 
     private:
         bool biosMapped;
