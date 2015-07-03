@@ -2,11 +2,16 @@
 #include <SDL/SDL.h>
 
 #include "GPU.hpp"
+#include "CPU.hpp"
+#include "Memory.hpp"
+
 
 using namespace std;
 
 
 GPU* gpu;
+CPU* cpu;
+Memory* memory;
 
 
 void oneIteration()
@@ -18,7 +23,7 @@ void oneIteration()
 int main(int argc, char** argv)
 {
     gpu = new GPU();
-
+    cpu = new CPU(memory);
     /**
      * Main loop
      */
