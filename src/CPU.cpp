@@ -59,7 +59,7 @@ void CPU::LDBC_nn()
 
 void CPU::LDBC_A()
 {
-    this->memory->writeByte((B << 8) | A, A);
+    this->memory->writeByte((B << 8) | C, A);
     this->clock_m = 8;
 }
 
